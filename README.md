@@ -4,7 +4,7 @@
 
 ## Description
 
-With this Progressive Budget Application, the user is able to add expenses and deposits to their budget with or without a connection. When entering tr
+With this Progressive Budget Application, the user is able to add expenses and deposits to their budget with or without a connection. When entering transactions offline, the user will populate the total once brought back online.
 
 ## Table of Contents
 
