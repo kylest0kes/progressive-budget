@@ -1,5 +1,6 @@
 let transactions = [];
 let myChart;
+let db;
 
 fetch("/api/transaction")
   .then(response => {
@@ -151,3 +152,66 @@ document.querySelector("#add-btn").onclick = function() {
 document.querySelector("#sub-btn").onclick = function() {
   sendTransaction(false);
 };
+
+//------IndexedDB------//
+
+const request = window.indexedDB.open("budget", 1);
+
+request.onupgradeneeded = function(event) {
+    db = event.target.result;
+
+    const budgetStore = db.createObjectStore("pending", {
+      autoIncrement: true
+    });
+
+    budgetStore.createIndex("transaction", "transaction");
+};
+
+request.onsuccess = function(event) {
+    db = event.target.result;
+    console.log(navigator)
+    if (navigator.onLine) {
+      checkDatabase();
+    }
+  };
+  
+request.onerror = function(event) {
+  console.log(event.target.errorCode)
+};
+
+function saveRecord(record) {
+  console.log(record);
+  const transaction = db.transaction(["pending"], "readwrite");
+  const store = transaction.objectStore("pending");
+
+  store.add(record);
+}
+
+function checkDatabase() {
+  
+  const transaction = db.transaction(["pending"], "readwrite");
+  
+  const store = transaction.objectStore("pending");
+  
+  const getAll = store.getAll();
+
+  getAll.onsuccess = function() {
+    if (getAll.result.length > 0) {
+      fetch("/api/transaction/bulk", {
+        method: "POST",
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(() => {
+        store.clear();
+      });
+    }
+  };
+}
+
+
+window.addEventListener("online", checkDatabase);
