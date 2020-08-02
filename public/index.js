@@ -160,16 +160,12 @@ const request = window.indexedDB.open("budget", 1);
 request.onupgradeneeded = function(event) {
     db = event.target.result;
 
-    const budgetStore = db.createObjectStore("pending", {
-      autoIncrement: true
-    });
+    db.createObjectStore("pending", { autoIncrement: true });
 
-    budgetStore.createIndex("transaction", "transaction");
 };
 
 request.onsuccess = function(event) {
     db = event.target.result;
-    console.log(navigator)
     if (navigator.onLine) {
       checkDatabase();
     }
@@ -188,11 +184,8 @@ function saveRecord(record) {
 }
 
 function checkDatabase() {
-  
   const transaction = db.transaction(["pending"], "readwrite");
-  
   const store = transaction.objectStore("pending");
-  
   const getAll = store.getAll();
 
   getAll.onsuccess = function() {
@@ -207,6 +200,8 @@ function checkDatabase() {
       })
       .then(response => response.json())
       .then(() => {
+        const transaction = db.transaction(["pending"], "readwrite");
+        const store = transaction.objectStore("pending");
         store.clear();
       });
     }
